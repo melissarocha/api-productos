@@ -8,6 +8,7 @@ const cors = require('cors');
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
 const userRoutes = require('./api/routes/users');
+const tiendaRoutes = require('./api/routes/tienda');
 
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/shop',(error)=>{
@@ -27,10 +28,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use('/tienda/products', productRoutes);
 app.use('/tienda/orders', orderRoutes);
 app.use('/tienda/users', userRoutes);
+app.use('/tienda', tiendaRoutes);
 
 app.use((req, res, next)=>{
   const error = new Error('Not found');
-  error.status(404);
+  error.status=404;
   next(error);
 });
 

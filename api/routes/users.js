@@ -7,33 +7,49 @@ const Order = require('../models/order');
 const Product = require('../models/product');
 
 router.get('/', (req, res, next) =>{
-
-  Product.find().exec().then(docs =>{
-    console.log(docs);
-    //if(docs.lenght >= 0){
-    res.status(200).json(docs);
-    // }else{
-    //   res.status(400).json({
-    //   message: 'No entries found'
-    // });
-  //}
-  }).catch(err => {
-    console.log(err).json({
-      error: err
+  User.find()
+    //.select("user _id")
+    .exec()
+    .then(docs => {
+      res.status(200).json({
+        count: docs.length,
+        users: docs.map(doc => {
+          return {
+            _id: doc._id,
+            name: doc.name,
+            request: {
+              type: "GET",
+              url: "http://localhost:3000/tienda/users/" + doc._id
+            }
+          };
+        })
+      });
+    })
+    .catch(err => {
+      res.status(500).json({
+        error: err
+      });
     });
-  });
 });
 
 router.post("/", (req, res, next) => {
-  const user = new User({
-      order: req.body.orderId
+  let user = new User({
+    name: req.body.name
   });
-  return order.save()
+  user
+    .save()
     .then(result => {
       console.log(result);
       res.status(201).json({
-        message: "Handling POST requests to /users",
-        createdUser: result
+        message: "Created user successfully",
+        createdUser: {
+            name: result.name,
+            _id: result._id,
+            request: {
+                type: 'GET',
+                url: "http://localhost:3000/tienda/users/" + result._id
+            }
+        }
       });
     })
     .catch(err => {
@@ -44,9 +60,9 @@ router.post("/", (req, res, next) => {
     });
 });
 
-router.get("/:productId", (req, res, next) => {
-  const id = req.params.productId;
-  Product.findOne({_id: id})
+router.get("/:userId", (req, res, next) => {
+  const id = req.params.userId;
+  User.findOne({_id: id})
     .exec()
     .then(doc => {
       console.log("From database", doc);
@@ -64,32 +80,9 @@ router.get("/:productId", (req, res, next) => {
     });
 });
 
-router.put("/q/:productId", (req, res, next) => {
-  const id = req.params.productId;
-  const updateOps = {};
-//   for (let key in req.body) {
-//     if (req.body.hasOwnProperty(key)) {
-//         console.log(key + " -> " + req.body[key]);
-//         updateOps[key] = req.body[key];
-//     }
-// }
-  Product.update({ _id: mongoose.Types.ObjectId(id) }, { $set: req.body })
-    .exec()
-    .then(result => {
-      console.log(result);
-      res.status(200).json(result);
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(500).json({
-        error: err
-      });
-    });
-});
-
-router.delete('/:productId', (req, res, next) =>{
-    const id = req.params.productId;
-    Product.remove({_id: id})
+router.delete('/:userId', (req, res, next) =>{
+    const id = req.params.userId;
+    User.remove({_id: id})
     .exec()
     .then(result =>{
       res.status(200).json(result);
@@ -103,5 +96,29 @@ router.delete('/:productId', (req, res, next) =>{
 });
 
 
+
+router.put("/q/:userId", (req, res, next) => {
+  const id = req.params.userId;
+  console.log(id);
+  const updateOps = {};
+//   for (let key in req.body) {
+//     if (req.body.hasOwnProperty(key)) {
+//         console.log(key + " -> " + req.body[key]);
+//         updateOps[key] = req.body[key];
+//     }
+// }
+  User.update({ _id: mongoose.Types.ObjectId(id) }, { $set: req.body })
+    .exec()
+    .then(result => {
+      console.log(result);
+      res.status(200).json(result);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: err
+      });
+    });
+});
 
 module.exports = router;

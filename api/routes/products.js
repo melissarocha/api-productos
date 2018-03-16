@@ -56,15 +56,25 @@ router.post("/", (req, res, next) => {
   const product = new Product({
     _id: new mongoose.Types.ObjectId(),
     name: req.body.name,
-    price: req.body.price
+    price: req.body.price,
+    quantity: req.body.quantity
   });
   product
     .save()
     .then(result => {
       console.log(result);
       res.status(201).json({
-        message: "Handling POST requests to /products",
-        createdProduct: result
+        message: "Created product successfully",
+        createdProduct: {
+            name: result.name,
+            price: result.price,
+            quantity: req.body.quantity,
+            _id: result._id,
+            request: {
+                type: 'GET',
+                url: "http://localhost:3000/products/" + result._id
+            }
+        }
       });
     })
     .catch(err => {
