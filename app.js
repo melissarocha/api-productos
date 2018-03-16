@@ -11,7 +11,7 @@ const userRoutes = require('./api/routes/users');
 const tiendaRoutes = require('./api/routes/tienda');
 
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/shop',(error)=>{
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://admin:admin@ds149874.mlab.com:49874/api-shop',(error)=>{
   if(error){
     console.log('Error', error);
   }else{
