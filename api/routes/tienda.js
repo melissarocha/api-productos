@@ -47,7 +47,7 @@ router.post('/:usuario/:pedido/addProd/:idProd', (req, res, next)=>{
           });
         }
         order.subTotal += product.quantity * product.price;
-        order.iva += order.subTotal * .15;
+        order.iva = order.subTotal * .15;
         order.total += order.subTotal + order.iva;
         order.product.push(product._id);
         order.save();
@@ -86,7 +86,7 @@ router.get("/:usuario/:pedido/prods", (req,res,next)=>{
   });
 });
 
-router.delete('/:usuario/:pedido/prods/delete/:idProd', (req, res, next)=>{
+router.post('/:usuario/:pedido/prods/delete/:idProd', (req, res, next)=>{
   let productToDelete;
   Order.findById(req.params.pedido)
     .populate("product")
@@ -99,9 +99,9 @@ router.delete('/:usuario/:pedido/prods/delete/:idProd', (req, res, next)=>{
 
       order.product.forEach((p,i) => {
         if(p._id == req.params.idProd){
-          order.subTotal -= Number(p.quantity) * p.price;
-          order.iva -= order.subTotal * .15;
-          order.total -= order.subTotal + order.iva;
+          order.subTotal -= (Number(p.quantity) * p.price);
+          order.iva -= (order.subTotal * .15);
+          order.total -= (order.subTotal + order.iva);
           order.product.splice(i,1);
           order.save((err)=>{
             if(err){
@@ -109,9 +109,7 @@ router.delete('/:usuario/:pedido/prods/delete/:idProd', (req, res, next)=>{
                 error: err
               });
             }
-            return res.status(404).json({
-              message: "Order Deleted"
-            });
+            return res.status(200).json(order);
 
           });
         }
@@ -179,6 +177,7 @@ router.get("/:usuario/pedido/:id", (req,res,next)=>{
     if(user.order.length > 0){
       user.order.forEach(o => {
         console.log("texto antes", o);
+        console.log("req.params.id", req.params.id);
         if(o == req.params.id){
           console.log("texto despues");
           Order.findById(req.params.id)
@@ -196,7 +195,7 @@ router.get("/:usuario/pedido/:id", (req,res,next)=>{
       });
     }
 
-    return res.status(201).json(user.order);
+    // return res.status(201).json(user.order);
   })
   .catch(err => {
     console.log(err);
